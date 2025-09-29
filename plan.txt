@@ -1,0 +1,26 @@
+
+To Fix
+- Change morale system to match original
+- Disincentive moving off a city to generate more morale
+x Add fade in animcation for new armies
+- Make land generation better
+x Better army strength/moral bubbles
+x Detect end game and show winning screen
+- Battles on water shouldn't leave scars
+- Battle scars should be proportional to casualities
+
+
+To Implement
+- Scrolling
+- Dynamic zoom
+- Computer arena
+x Terrain images for better grass
+- Better water
+- Better coastlines
+- Mountain / desert regions
+x Lasting battle scars
+- Dynamic land edges with water
+- Town and port names
+- Add specific mode for single player allowing selecting a capital
+- 
+
