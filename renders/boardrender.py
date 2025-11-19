@@ -1,9 +1,9 @@
 import pygame as pg
 import board as b
-from spacerender import GSpace
-from armyrender import GArmy
-from evalrender import GEval
-from backgroundrender import GBackground
+from renders.spacerender import GSpace
+from renders.armyrender import GArmy
+from renders.evalrender import GEval
+from renders.backgroundrender import GBackground
 from datatypes import Coord
 
 class GBoard():

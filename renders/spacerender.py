@@ -3,7 +3,7 @@ import math
 import random
 from hexutils import calculateHexPosition, hexGeomertry
 from datatypes import PlayerColors
-from animationconstants import BORDER_FADE_IN_TIME, BORDER_FADE_OUT_TIME
+from renders.animationconstants import BORDER_FADE_IN_TIME, BORDER_FADE_OUT_TIME
 
 class GSpace:
 	def __init__(self, clock, GAME_FONT, space, c, r, w, h):

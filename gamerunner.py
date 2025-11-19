@@ -2,7 +2,7 @@ import board as b
 import time
 import cProfile
 from datatypes import GameStatus, Board, GameProgress, Move
-from objective_player import ObjectivePlayer
+from players.objective_player import ObjectivePlayer
 
 class ComputerGameRunner():
 	"""

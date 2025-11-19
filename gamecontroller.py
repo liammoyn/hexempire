@@ -1,5 +1,5 @@
 import board as b
-from boardrender import GBoard
+from renders.boardrender import GBoard
 from datatypes import GameStatus, Board, GameProgress, Move
 
 class GameStateController():

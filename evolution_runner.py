@@ -4,7 +4,7 @@ import random
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from gamerunner import ComputerGameRunner
-from objective_player import ObjectivePlayer, defaultPreferences, getPreferenceIdFromVector
+from players.objective_player import ObjectivePlayer, defaultPreferences, getPreferenceIdFromVector
 
 def runGameHelper(gameRunnerInstance):
 	method = getattr(gameRunnerInstance, "runGame")

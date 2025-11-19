@@ -3,7 +3,7 @@ import pygame.freetype as ft
 from pygame.math import lerp
 from hexutils import calculateHexPosition
 from datatypes import PlayerColors
-from animationconstants import INFO_FADE_TIME, MOVE_TIME, BOOM_TIME, MOVE_BOOM_OVERLAP_TIME, APPEAR_TIME
+from renders.animationconstants import INFO_FADE_TIME, MOVE_TIME, BOOM_TIME, MOVE_BOOM_OVERLAP_TIME, APPEAR_TIME
 
 class GArmy:
 	def __init__(self, FONT, clock, army, c, r, w, h):

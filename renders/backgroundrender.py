@@ -4,7 +4,7 @@ import math
 import random
 from hexutils import hexGeomertry, calculateHexPosition, calculateBoardDimensions, getAdjacentHexPositions
 from datatypes import Coord, PlayerColors
-from animationconstants import EXPLOSION_MARK_TIME
+from renders.animationconstants import EXPLOSION_MARK_TIME
 
 class GBackground():
 	class ENode():

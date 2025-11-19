@@ -3,13 +3,13 @@ import pygame.freetype
 import math
 import queue
 import threading
-from inputrender import GInputBox
-from statusrender import GStatus
+from renders.inputrender import GInputBox
+from renders.statusrender import GStatus
 from gamecontroller import GameStateController
-from naive_player import NaivePlayer
-from evaluation_player import EvaluationPlayer
-from objective_player import ObjectivePlayer
-from computer_wrapper import ComputerWrapper, COMPUTER_MOVE_TYPE, COMPUTER_EVALS_TYPE
+from players.naive_player import NaivePlayer
+from players.evaluation_player import EvaluationPlayer
+from players.objective_player import ObjectivePlayer
+from players.computer_wrapper import ComputerWrapper, COMPUTER_MOVE_TYPE, COMPUTER_EVALS_TYPE
 from hexutils import calculateBoardDimensions
 
 import cProfile
