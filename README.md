@@ -11,3 +11,21 @@ python main.py
 1. Make the options for the game editable through an interface
 2. Run evolutionary algorithm to determine the best values for the CPU players
 3. Tasks in the `plan.txt` file
+
+## Environment
+
+Set up a Python virtual environment and install dependencies (tested on macOS with `zsh`):
+
+```
+# create venv and install
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# alternatively run the helper script
+bash scripts/setup_env.sh
+```
+
+Notes:
+- This project requires `pygame` and `numpy` (listed in `requirements.txt`).
+- The `scripts/setup_env.sh` script will create or reuse `.venv`, upgrade `pip`, and install from `requirements.txt`.
