@@ -1,19 +1,17 @@
 import os
+import asyncio
 import pygame as pg
 import pygame.freetype
 import math
-import queue
-import threading
 from renders.inputrender import GInputBox
 from renders.statusrender import GStatus
 from gamecontroller import GameStateController
 from players.naive_player import NaivePlayer
 from players.evaluation_player import EvaluationPlayer
 from players.objective_player import ObjectivePlayer
-from players.computer_wrapper import ComputerWrapper, COMPUTER_MOVE_TYPE, COMPUTER_EVALS_TYPE
+from players.computer_wrapper import ComputerWrapper
+from datatypes import GameProgress
 from hexutils import calculateBoardDimensions
-
-import cProfile
 
 def tryfloat(s) -> float or None:
 	try:
@@ -65,21 +63,13 @@ class MainRender:
 
 		print(f"{dwidth} {dheight} {hexW} {hexH}")
 
-		computerPlayers = [
+		self.computerPlayers = [
 			ComputerWrapper(ObjectivePlayer(0), 0),
 			ComputerWrapper(ObjectivePlayer(1), 1),
 			ComputerWrapper(ObjectivePlayer(2), 2),
 			ComputerWrapper(ObjectivePlayer(3), 3)
 		]
 		isUserPlayer = [False, False, False, False]
-		self.computerQueues = []
-		self.computerThreads = []
-		for computerPlayer in computerPlayers:
-			computerQueue = queue.Queue()
-			ct = threading.Thread(target=computerPlayer.startGameThinking, args=(computerQueue,))
-			ct.daemon = True
-			self.computerQueues.append(computerQueue)
-			self.computerThreads.append(ct)
 
 		self.clock = pg.time.Clock()
 		startStepping = True
@@ -88,15 +78,13 @@ class MainRender:
 		self.savedGameState = None
 		self.gameStatusHistory = [ self.gamecontroller.getGameStateString() ]
 		self.isNewGame = True
+		self.lastMoveCounter = None
 
 		# self.zoom = 1
 		# self.scroll = 0
 
 
-	def start_mainloop(self):
-		for computerThread in self.computerThreads:
-			computerThread.start()
-		lastMoveCounter = None
+	async def start_mainloop(self):
 		self.gamecontroller.startGame()
 
 		avgFps = 0
@@ -104,26 +92,33 @@ class MainRender:
 
 		timeRunning = 0
 		self.running = True
-		while self.running:# and timeRunning < 10_000:
+		while self.running:
 			self.clock.tick()
-			# timeRunning += self.clock.get_time()
-			# fps = 1000 / self.clock.get_time()
-			# fpss += 1
-			# avgFps = avgFps * (fpss - 1) / fpss + fps / fpss
-			
+
 			self.handleEvents(pg.event.get())
 
 			gameStatus = self.gamecontroller.getStatus()
 
-			if gameStatus.moveCounter != lastMoveCounter or self.isNewGame:
+			# Run AI move inline (replaces background threads)
+			if (gameStatus.gameProgress == GameProgress.RUNNING
+					and not self.gamecontroller.isUserPlayer[gameStatus.currentTurn]
+					and gameStatus.moveCounter != self.lastMoveCounter
+					and not self.gamecontroller.stepping):
+				self.lastMoveCounter = gameStatus.moveCounter
+				player = self.computerPlayers[gameStatus.currentTurn]
+				move, moveEvals, objectiveEvals = player.requestMove(gameStatus.board, gameStatus.movesLeft)
+				self.gamecontroller.handleComputerMove(move, gameStatus.currentTurn)
+				self.gamecontroller.handleComputerEvals(moveEvals, objectiveEvals, gameStatus.currentTurn)
+				gameStatus = self.gamecontroller.getStatus()
+
+			if self.isNewGame:
 				self.isNewGame = False
-				for queue in self.computerQueues:
-					queue.put(gameStatus)
-				lastMoveCounter = gameStatus.moveCounter
+				self.lastMoveCounter = None
 
 			self.draw(gameStatus)
 
 			pg.display.flip()
+			await asyncio.sleep(0)
 		print(avgFps)
 
 
@@ -143,17 +138,30 @@ class MainRender:
 				elif event.key == pg.K_e:
 					self.gamecontroller.handleUserEndTurn()
 				elif event.key == pg.K_RIGHT:
+					# In stepping mode, queue the next AI move then step it forward
+					if self.gamecontroller.stepping:
+						gameStatus = self.gamecontroller.getStatus()
+						if (gameStatus.gameProgress == GameProgress.RUNNING
+								and not self.gamecontroller.isUserPlayer[gameStatus.currentTurn]
+								and self.gamecontroller.queuedMove is None):
+							self.lastMoveCounter = gameStatus.moveCounter
+							player = self.computerPlayers[gameStatus.currentTurn]
+							move, moveEvals, objectiveEvals = player.requestMove(gameStatus.board, gameStatus.movesLeft)
+							self.gamecontroller.handleComputerMove(move, gameStatus.currentTurn)
+							self.gamecontroller.handleComputerEvals(moveEvals, objectiveEvals, gameStatus.currentTurn)
 					self.gameStatusHistory.append(self.gamecontroller.getGameStateString())
 					self.gamecontroller.handleStepForward()
 				elif event.key == pg.K_LEFT and len(self.gameStatusHistory) > 1:
 					lastGameState = self.gameStatusHistory.pop()
 					self.gamecontroller.useGameStateString(lastGameState)
+					self.lastMoveCounter = None
 				elif event.key == pg.K_s:
 					self.gamecontroller.toggleStepping()
 				elif event.key == pg.K_p:
 					self.savedGameState = self.gamecontroller.getGameStateString()
 				elif event.key == pg.K_l and self.savedGameState is not None:
 					self.gamecontroller.useGameStateString(self.savedGameState)
+					self.lastMoveCounter = None
 				elif event.key == pg.K_z:
 					self.zoom = self.zoom * 0.9
 				elif event.key == pg.K_x:
@@ -165,12 +173,6 @@ class MainRender:
 			elif event.type == pg.MOUSEBUTTONUP:
 				if self.vpRect.collidepoint(event.pos):
 					self.gamecontroller.handleUserClick(event.pos - self.vpPos)
-			elif event.type == COMPUTER_MOVE_TYPE:
-				# Computer players will publish moves to pg.event.post() when they have them
-				self.gamecontroller.handleComputerMove(event.move, event.playerId)
-			elif event.type == COMPUTER_EVALS_TYPE:
-				# Computer players will publish moves to pg.event.post() when they have them
-				self.gamecontroller.handleComputerEvals(event.moveEvaluations, event.objectiveEvaluations, event.playerId)
 
 
 	def draw(self, gameStatus):
@@ -185,10 +187,6 @@ class MainRender:
 		vpMousePos = pg.mouse.get_pos() - self.vpPos if self.vpRect.collidepoint(pg.mouse.get_pos()) else None
 		self.gamecontroller.draw(self.vp, vpMousePos)
 
-		# finalVp = pg.Surface((self.vpRect.width, self.vpRect.height), pg.SRCALPHA)
-		# zoomedVp = pg.transform.scale(self.vp, (self.vpRect.width * self.zoom, self.vpRect.height * self.zoom))
-		# finalVp.blit(zoomedVp, (self.scroll, 0))
-
 		self.screen.blit(self.vp, self.vpPos)
 
 	def getNewBoardValues(self):
@@ -198,14 +196,12 @@ class MainRender:
 		return waterFloat, portFloat, townFloat
 
 
-def main():
+async def main():
 	pg.init()
 	GAME_FONT = pg.freetype.Font(os.path.join(os.path.dirname(__file__), "RobotoMono-VariableFont_wght.ttf"), 24)
 	render = MainRender(GAME_FONT, 12, 12)
-	render.start_mainloop()
+	await render.start_mainloop()
 	pg.quit()
 
 
-if __name__ == '__main__':
-	main()
-	# cProfile.run('main()')
+asyncio.run(main())
