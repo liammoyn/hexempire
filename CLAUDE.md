@@ -13,7 +13,7 @@ A pygame-ce reimplementation of the flash game Hex Empire — 4-player turn-base
 .venv/bin/python -m http.server 8000 --directory build/web
 
 # First-time web setup (run once, Ctrl+C when "Serving python files..." appears)
-.venv/bin/python -m pygbag --port 8000 main.py
+.venv/bin/python -m pygbag --port 8000 --template template.tmpl main.py
 
 # Environment setup
 bash scripts/setup_env.sh

@@ -39,8 +39,8 @@ The game can be run in a browser via [pygbag](https://pygame-web.github.io/), wh
 **First-time setup** (once per machine, after the venv is created):
 
 ```bash
-# Generate the HTML shell — wait for "Serving python files from..." then Ctrl+C
-.venv/bin/python -m pygbag --port 8000 main.py
+# Generate the HTML shell from template.tmpl — wait for "Serving python files from..." then Ctrl+C
+.venv/bin/python -m pygbag --port 8000 --template template.tmpl main.py
 
 # Build the game bundle and download the pygame-ce WASM wheel
 .venv/bin/python build_web.py
