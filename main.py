@@ -1,3 +1,4 @@
+import os
 import pygame as pg
 import pygame.freetype
 import math
@@ -199,8 +200,8 @@ class MainRender:
 
 def main():
 	pg.init()
-	GAME_FONT = pg.freetype.Font("/System/Library/Fonts/SFNSMono.ttf", 24)
-	render = MainRender(GAME_FONT, 12, 8)
+	GAME_FONT = pg.freetype.Font(os.path.join(os.path.dirname(__file__), "RobotoMono-VariableFont_wght.ttf"), 24)
+	render = MainRender(GAME_FONT, 12, 12)
 	render.start_mainloop()
 	pg.quit()
 

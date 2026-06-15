@@ -21,12 +21,12 @@ class GStatus:
 		pg.draw.rect(sf, "white", ((borderSize, borderSize), pg.Vector2(self.size) - pg.Vector2(borderSize * 2, borderSize * 2)))
 
 		if status.gameProgress == GameProgress.OVER:
-			resultS, resultBB = self.GAME_FONT.render("{} Wins!".format(playerName), "black", 10)
+			resultS, resultBB = self.GAME_FONT.render("{} Wins!".format(playerName), "black", 8)
 
 			sf.blit(resultS, ((self.size[0] - resultBB.w) / 2, (self.size[1] - resultBB.h) / 2))
 		else:
-			turnS, turnBB = self.GAME_FONT.render("Turn: {}".format(playerName), "black", 10)
-			moveS, moveBB = self.GAME_FONT.render("Moves Left: {}".format(status.movesLeft), "black", 10)
+			turnS, turnBB = self.GAME_FONT.render("Turn: {}".format(playerName), "black", 8)
+			moveS, moveBB = self.GAME_FONT.render("Moves Left: {}".format(status.movesLeft), "black", 8)
 
 			sf.blit(turnS, (borderSize, borderSize + 2))
 			sf.blit(moveS, (self.size[0] - borderSize - moveBB.w, borderSize + 2))

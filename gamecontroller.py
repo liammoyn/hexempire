@@ -12,10 +12,10 @@ class GameStateController():
 	Takes moves from players and updates game state accordingly
 		Knows which players are users and which computers and who's turn it is
 
-Other class?
-	Recieves a computer instance for each player
-This class?
-	Can be told to switch between a computer and user for any player at any point
+	Other class?
+		Recieves a computer instance for each player
+	This class?
+		Can be told to switch between a computer and user for any player at any point
 
 
 	Begins in a start state where no moves are made

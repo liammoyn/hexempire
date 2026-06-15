@@ -9,7 +9,7 @@ class GInputBox:
 		self.rect = pg.Rect(x, y, w, h)
 		self.color = self.COLOR_INACTIVE
 		self.text = text
-		surface, bb = GAME_FONT.render(text, "black", size=12)
+		surface, bb = GAME_FONT.render(text, "black", size=9)
 		self.text_surface = surface
 		self.active = False
 
@@ -25,7 +25,7 @@ class GInputBox:
 				self.text = self.text[:-1]
 			elif pg.key.name(event.key).isdigit() or event.key == pg.K_PERIOD:
 				self.text += event.unicode
-			surface, bb = self.GAME_FONT.render(self.text, "black", size=12)
+			surface, bb = self.GAME_FONT.render(self.text, "black", size=9)
 			self.text_surface = surface
 
 	def draw(self, screen):
