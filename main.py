@@ -37,14 +37,21 @@ class MainRender:
 		# hs = horizontal spacing = distance from center to point
 		vs = vheight / (2 * rows + 1)
 		hs = (vs * 2 / math.sqrt(3))
-		hexW = int(hs * 2)
-		hexH = int(vs * 2)
+		hexW_display = int(hs * 2)
+		hexH_display = int(vs * 2)
 
-		boardWidth, boardHeight = calculateBoardDimensions(cols, rows, hexW, hexH)
+		self.ssScale = 4
+		hexW = hexW_display * self.ssScale
+		hexH = hexH_display * self.ssScale
+
+		boardWidth, boardHeight = calculateBoardDimensions(cols, rows, hexW_display, hexH_display)
+		boardWidth_ss = int(boardWidth * self.ssScale)
+		boardHeight_ss = int(boardHeight * self.ssScale)
 		h_offset = (vwidth - boardWidth) / 2
 
 		self.screen = pg.display.set_mode((dwidth, dheight))
-		self.vp = pg.Surface((boardWidth, boardHeight + 1), pg.SRCALPHA)
+		self.vp = pg.Surface((boardWidth_ss, boardHeight_ss + 1), pg.SRCALPHA)
+		self.vpDisplaySize = (int(boardWidth), int(boardHeight))
 
 		viewX = boarderWidth + h_offset
 		viewY = boarderHeight
@@ -172,7 +179,8 @@ class MainRender:
 					self.scroll += 25
 			elif event.type == pg.MOUSEBUTTONUP:
 				if self.vpRect.collidepoint(event.pos):
-					self.gamecontroller.handleUserClick(event.pos - self.vpPos)
+					click_pos = (pg.Vector2(event.pos) - self.vpPos) * self.ssScale
+					self.gamecontroller.handleUserClick(click_pos)
 
 
 	def draw(self, gameStatus):
@@ -185,9 +193,11 @@ class MainRender:
 		self.status_box.draw(self.screen, gameStatus)
 
 		vpMousePos = pg.mouse.get_pos() - self.vpPos if self.vpRect.collidepoint(pg.mouse.get_pos()) else None
-		self.gamecontroller.draw(self.vp, vpMousePos)
+		vpMousePos_ss = vpMousePos * self.ssScale if vpMousePos is not None else None
+		self.gamecontroller.draw(self.vp, vpMousePos_ss)
 
-		self.screen.blit(self.vp, self.vpPos)
+		scaled_vp = pg.transform.smoothscale(self.vp, self.vpDisplaySize)
+		self.screen.blit(scaled_vp, self.vpPos)
 
 	def getNewBoardValues(self):
 		waterFloat = tryfloat(self.input_boxes[0].text)
