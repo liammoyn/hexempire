@@ -3,7 +3,7 @@ import asyncio
 import pygame as pg
 import pygame.freetype
 import math
-from renders.inputrender import GInputBox
+from renders.settingspanel import GSettingsPanel
 from renders.statusrender import GStatus
 from gamecontroller import GameStateController
 from players.naive_player import NaivePlayer
@@ -12,13 +12,6 @@ from players.objective_player import ObjectivePlayer
 from players.computer_wrapper import ComputerWrapper
 from datatypes import GameProgress
 from hexutils import calculateBoardDimensions
-
-def tryfloat(s) -> float or None:
-	try:
-		f = float(s)
-		return f
-	except ValueError:
-		return None
 
 class MainRender:
 	def __init__(self, GAME_FONT, cols, rows):
@@ -60,11 +53,7 @@ class MainRender:
 
 		# TODO: Make input and status box dynamic based on display properties
 
-		water_level_ib = GInputBox(GAME_FONT, 100, 9, 100, 32)
-		port_level_ib = GInputBox(GAME_FONT, 220, 9, 100, 32)
-		town_level_ib = GInputBox(GAME_FONT, 340, 9, 100, 32)
-		self.input_boxes = [water_level_ib, port_level_ib, town_level_ib]
-
+		self.settings_panel = GSettingsPanel(GAME_FONT, (dwidth, dheight))
 		self.status_box = GStatus(GAME_FONT, 500, 5, 300, 40)
 		# TODO: Add a button for ending turn early
 
@@ -134,8 +123,8 @@ class MainRender:
 			if event.type == pg.QUIT:
 				print(self.savedGameState)
 				self.running = False
-			for box in self.input_boxes:
-				box.handle_event(event)
+			if self.settings_panel.handle_event(event):
+				continue
 			if event.type == pg.KEYDOWN:
 				if event.key == pg.K_SPACE:
 					waterFloat, portFloat, townFloat = self.getNewBoardValues()
@@ -187,9 +176,6 @@ class MainRender:
 		self.screen.fill("white")
 		self.vp.fill("white")
 
-		for box in self.input_boxes:
-			box.draw(self.screen)
-
 		self.status_box.draw(self.screen, gameStatus)
 
 		vpMousePos = pg.mouse.get_pos() - self.vpPos if self.vpRect.collidepoint(pg.mouse.get_pos()) else None
@@ -199,11 +185,10 @@ class MainRender:
 		scaled_vp = pg.transform.smoothscale(self.vp, self.vpDisplaySize)
 		self.screen.blit(scaled_vp, self.vpPos)
 
+		self.settings_panel.draw(self.screen)
+
 	def getNewBoardValues(self):
-		waterFloat = tryfloat(self.input_boxes[0].text)
-		portFloat = tryfloat(self.input_boxes[1].text)
-		townFloat = tryfloat(self.input_boxes[2].text)
-		return waterFloat, portFloat, townFloat
+		return self.settings_panel.get_values()
 
 
 async def main():
